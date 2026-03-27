@@ -3,6 +3,7 @@
 [![CI](https://github.com/philiprehberger/dotnet-expression-evaluator/actions/workflows/ci.yml/badge.svg)](https://github.com/philiprehberger/dotnet-expression-evaluator/actions/workflows/ci.yml)
 [![NuGet](https://img.shields.io/nuget/v/Philiprehberger.ExpressionEvaluator.svg)](https://www.nuget.org/packages/Philiprehberger.ExpressionEvaluator)
 [![License](https://img.shields.io/github/license/philiprehberger/dotnet-expression-evaluator)](LICENSE)
+[![Sponsor](https://img.shields.io/badge/sponsor-GitHub%20Sponsors-ec6cb9)](https://github.com/sponsors/philiprehberger)
 
 Safe mathematical expression parser and evaluator with variables, custom functions, and operator precedence.
 
@@ -108,4 +109,4 @@ dotnet build src/Philiprehberger.ExpressionEvaluator.csproj --configuration Rele
 
 ## License
 
-MIT
+[MIT](LICENSE)
