@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.2.0 (2026-03-28)
+
+- Add user-defined custom functions via `RegisterFunction` with optional arity validation
+- Add conditional (ternary) expressions with `condition ? trueExpr : falseExpr` syntax
+- Add comparison operators: `>`, `<`, `>=`, `<=`, `==`, `!=` returning 1.0/0.0
+- Add math functions: `asin`, `acos`, `atan`, `atan2`, `exp`, `log10`, `pow`, `sign`, `truncate`
+- Change `Evaluator` from static class to instance class for custom function support
+- Add static `Eval` and `CompileStatic` methods for stateless usage
+- Add unit test project with xUnit
+- Add GitHub issue templates, dependabot, and PR template
+
 ## 0.1.1 (2026-03-26)
 
 - Add Sponsor badge and fix License link format in README

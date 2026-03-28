@@ -26,6 +26,22 @@ internal sealed record VariableNode(string Name) : AstNode;
 internal sealed record BinaryNode(char Operator, AstNode Left, AstNode Right) : AstNode;
 
 /// <summary>
+/// A comparison operation returning 1.0 for true or 0.0 for false.
+/// </summary>
+/// <param name="Operator">The comparison operator string (e.g. "&gt;", "&lt;=", "==", "!=").</param>
+/// <param name="Left">The left operand.</param>
+/// <param name="Right">The right operand.</param>
+internal sealed record ComparisonNode(string Operator, AstNode Left, AstNode Right) : AstNode;
+
+/// <summary>
+/// A conditional (ternary) expression: condition ? trueExpr : falseExpr.
+/// </summary>
+/// <param name="Condition">The condition expression.</param>
+/// <param name="TrueExpr">The expression to evaluate when the condition is non-zero.</param>
+/// <param name="FalseExpr">The expression to evaluate when the condition is zero.</param>
+internal sealed record ConditionalNode(AstNode Condition, AstNode TrueExpr, AstNode FalseExpr) : AstNode;
+
+/// <summary>
 /// A unary operation (e.g. negation).
 /// </summary>
 /// <param name="Operator">The operator character.</param>

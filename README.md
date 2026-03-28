@@ -2,7 +2,11 @@
 
 [![CI](https://github.com/philiprehberger/dotnet-expression-evaluator/actions/workflows/ci.yml/badge.svg)](https://github.com/philiprehberger/dotnet-expression-evaluator/actions/workflows/ci.yml)
 [![NuGet](https://img.shields.io/nuget/v/Philiprehberger.ExpressionEvaluator.svg)](https://www.nuget.org/packages/Philiprehberger.ExpressionEvaluator)
+[![GitHub release](https://img.shields.io/github/v/release/philiprehberger/dotnet-expression-evaluator)](https://github.com/philiprehberger/dotnet-expression-evaluator/releases)
+[![Last updated](https://img.shields.io/github/last-commit/philiprehberger/dotnet-expression-evaluator)](https://github.com/philiprehberger/dotnet-expression-evaluator/commits/main)
 [![License](https://img.shields.io/github/license/philiprehberger/dotnet-expression-evaluator)](LICENSE)
+[![Bug Reports](https://img.shields.io/github/issues/philiprehberger/dotnet-expression-evaluator/bug)](https://github.com/philiprehberger/dotnet-expression-evaluator/issues?q=is%3Aissue+is%3Aopen+label%3Abug)
+[![Feature Requests](https://img.shields.io/github/issues/philiprehberger/dotnet-expression-evaluator/enhancement)](https://github.com/philiprehberger/dotnet-expression-evaluator/issues?q=is%3Aissue+is%3Aopen+label%3Aenhancement)
 [![Sponsor](https://img.shields.io/badge/sponsor-GitHub%20Sponsors-ec6cb9)](https://github.com/sponsors/philiprehberger)
 
 Safe mathematical expression parser and evaluator with variables, custom functions, and operator precedence.
@@ -18,7 +22,7 @@ dotnet add package Philiprehberger.ExpressionEvaluator
 ```csharp
 using Philiprehberger.ExpressionEvaluator;
 
-double result = Evaluator.Evaluate("2 + 3 * 4");
+double result = Evaluator.Eval("2 + 3 * 4");
 // result = 14
 ```
 
@@ -27,10 +31,10 @@ double result = Evaluator.Evaluate("2 + 3 * 4");
 ```csharp
 using Philiprehberger.ExpressionEvaluator;
 
-Evaluator.Evaluate("10 / 2 + 1");   // 6
-Evaluator.Evaluate("2 ^ 10");        // 1024
-Evaluator.Evaluate("10 % 3");        // 1
-Evaluator.Evaluate("-5 + 3");        // -2
+Evaluator.Eval("10 / 2 + 1");   // 6
+Evaluator.Eval("2 ^ 10");        // 1024
+Evaluator.Eval("10 % 3");        // 1
+Evaluator.Eval("-5 + 3");        // -2
 ```
 
 ### Variables
@@ -44,8 +48,32 @@ var variables = new Dictionary<string, double>
     ["y"] = 4
 };
 
-double result = Evaluator.Evaluate("sqrt(x^2 + y^2)", variables);
+double result = Evaluator.Eval("sqrt(x^2 + y^2)", variables);
 // result = 5
+```
+
+### Comparison Operators
+
+```csharp
+using Philiprehberger.ExpressionEvaluator;
+
+Evaluator.Eval("3 > 2");    // 1 (true)
+Evaluator.Eval("3 < 2");    // 0 (false)
+Evaluator.Eval("5 >= 5");   // 1
+Evaluator.Eval("4 <= 3");   // 0
+Evaluator.Eval("5 == 5");   // 1
+Evaluator.Eval("5 != 3");   // 1
+```
+
+### Conditional Expressions
+
+```csharp
+using Philiprehberger.ExpressionEvaluator;
+
+var vars = new Dictionary<string, double> { ["x"] = -5 };
+
+Evaluator.Eval("x > 0 ? x : -x", vars);   // 5 (absolute value via ternary)
+Evaluator.Eval("1 > 2 ? 100 : 200");       // 200
 ```
 
 ### Custom Functions
@@ -53,14 +81,29 @@ double result = Evaluator.Evaluate("sqrt(x^2 + y^2)", variables);
 ```csharp
 using Philiprehberger.ExpressionEvaluator;
 
-Evaluator.Evaluate("abs(-42)");           // 42
-Evaluator.Evaluate("min(10, 20)");        // 10
-Evaluator.Evaluate("max(10, 20)");        // 20
-Evaluator.Evaluate("round(3.7)");         // 4
-Evaluator.Evaluate("ceil(2.1)");          // 3
-Evaluator.Evaluate("floor(2.9)");         // 2
-Evaluator.Evaluate("sin(pi / 2)");        // 1
-Evaluator.Evaluate("log(e)");             // 1
+var evaluator = new Evaluator();
+evaluator.RegisterFunction("clamp", 3, args =>
+    Math.Max(args[1], Math.Min(args[2], args[0])));
+
+evaluator.Evaluate("clamp(15, 0, 10)");  // 10
+evaluator.Evaluate("clamp(-5, 0, 10)");  // 0
+```
+
+### Built-in Functions
+
+```csharp
+using Philiprehberger.ExpressionEvaluator;
+
+Evaluator.Eval("abs(-42)");           // 42
+Evaluator.Eval("min(10, 20)");        // 10
+Evaluator.Eval("max(10, 20)");        // 20
+Evaluator.Eval("round(3.7)");         // 4
+Evaluator.Eval("ceil(2.1)");          // 3
+Evaluator.Eval("floor(2.9)");         // 2
+Evaluator.Eval("sin(pi / 2)");        // 1
+Evaluator.Eval("log(e)");             // 1
+Evaluator.Eval("pow(2, 10)");         // 1024
+Evaluator.Eval("log10(100)");         // 2
 ```
 
 ### Compiled Expressions
@@ -68,7 +111,7 @@ Evaluator.Evaluate("log(e)");             // 1
 ```csharp
 using Philiprehberger.ExpressionEvaluator;
 
-var formula = Evaluator.Compile("x^2 + 2*x + 1");
+var formula = Evaluator.CompileStatic("x^2 + 2*x + 1");
 
 double r1 = formula(new Dictionary<string, double> { ["x"] = 3 });  // 16
 double r2 = formula(new Dictionary<string, double> { ["x"] = 5 });  // 36
@@ -76,12 +119,38 @@ double r2 = formula(new Dictionary<string, double> { ["x"] = 5 });  // 36
 
 ## API
 
-### `Evaluator`
+### `Evaluator` (static methods)
 
 | Method | Description |
 |--------|-------------|
-| `Evaluate(string expression, IDictionary<string, double>? variables = null)` | Parses and evaluates an expression, returning the result |
-| `Compile(string expression)` | Compiles an expression into a reusable delegate |
+| `Eval(string expression, IDictionary<string, double>? variables = null)` | Parses and evaluates an expression, returning the result |
+| `CompileStatic(string expression)` | Compiles an expression into a reusable delegate |
+
+### `Evaluator` (instance methods)
+
+| Method | Description |
+|--------|-------------|
+| `RegisterFunction(string name, Func<double[], double> function)` | Registers a custom function by name |
+| `RegisterFunction(string name, int arity, Func<double[], double> function)` | Registers a custom function with arity validation |
+| `Evaluate(string expression, IDictionary<string, double>? variables = null)` | Evaluates an expression with access to registered custom functions |
+| `Compile(string expression)` | Compiles an expression with access to registered custom functions |
+
+### Comparison Operators
+
+| Operator | Description |
+|----------|-------------|
+| `>` | Greater than (returns 1.0 or 0.0) |
+| `<` | Less than |
+| `>=` | Greater than or equal |
+| `<=` | Less than or equal |
+| `==` | Equal |
+| `!=` | Not equal |
+
+### Conditional Expression
+
+| Syntax | Description |
+|--------|-------------|
+| `condition ? trueExpr : falseExpr` | Evaluates trueExpr if condition is non-zero, falseExpr otherwise |
 
 ### Built-in Functions
 
@@ -97,7 +166,16 @@ double r2 = formula(new Dictionary<string, double> { ["x"] = 5 });  // 36
 | `sin(x)` | Sine (radians) |
 | `cos(x)` | Cosine (radians) |
 | `tan(x)` | Tangent (radians) |
+| `asin(x)` | Inverse sine |
+| `acos(x)` | Inverse cosine |
+| `atan(x)` | Inverse tangent |
+| `atan2(y, x)` | Two-argument inverse tangent |
 | `log(x)` | Natural logarithm |
+| `log10(x)` | Base-10 logarithm |
+| `exp(x)` | Exponential (e^x) |
+| `pow(x, y)` | Power (x^y) |
+| `sign(x)` | Sign (-1, 0, or 1) |
+| `truncate(x)` | Truncate toward zero |
 | `pi` | Constant 3.14159... |
 | `e` | Constant 2.71828... |
 
@@ -106,6 +184,13 @@ double r2 = formula(new Dictionary<string, double> { ["x"] = 5 });  // 36
 ```bash
 dotnet build src/Philiprehberger.ExpressionEvaluator.csproj --configuration Release
 ```
+
+## Support
+
+If you find this package useful, consider giving it a star on GitHub — it helps motivate continued maintenance and development.
+
+[![LinkedIn](https://img.shields.io/badge/Philip%20Rehberger-LinkedIn-0A66C2?logo=linkedin)](https://www.linkedin.com/in/philiprehberger)
+[![More packages](https://img.shields.io/badge/more-open%20source%20packages-blue)](https://philiprehberger.com/open-source-packages)
 
 ## License
 

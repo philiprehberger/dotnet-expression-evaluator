@@ -2,7 +2,7 @@ namespace Philiprehberger.ExpressionEvaluator;
 
 /// <summary>
 /// Recursive descent parser that builds an AST from a list of tokens.
-/// Operator precedence (lowest to highest): +/-, */%, ^.
+/// Operator precedence (lowest to highest): ternary, comparison, +/-, */%, ^.
 /// </summary>
 internal sealed class Parser
 {
@@ -26,7 +26,7 @@ internal sealed class Parser
     /// <exception cref="FormatException">Thrown when the expression is malformed.</exception>
     public AstNode Parse()
     {
-        var node = ParseAddSub();
+        var node = ParseTernary();
 
         if (Current.Kind != TokenKind.End)
             throw new FormatException($"Unexpected token '{Current.Value}' after end of expression.");
@@ -50,7 +50,39 @@ internal sealed class Parser
         return Consume();
     }
 
-    // Addition and subtraction (lowest precedence)
+    // Ternary conditional (lowest precedence): expr ? expr : expr
+    private AstNode ParseTernary()
+    {
+        var condition = ParseComparison();
+
+        if (Current.Kind == TokenKind.Question)
+        {
+            Consume(); // consume '?'
+            var trueExpr = ParseTernary();
+            Expect(TokenKind.Colon);
+            var falseExpr = ParseTernary();
+            return new ConditionalNode(condition, trueExpr, falseExpr);
+        }
+
+        return condition;
+    }
+
+    // Comparison operators (>, <, >=, <=, ==, !=)
+    private AstNode ParseComparison()
+    {
+        var left = ParseAddSub();
+
+        if (Current.Kind == TokenKind.Comparison)
+        {
+            var op = Consume().Value;
+            var right = ParseAddSub();
+            return new ComparisonNode(op, left, right);
+        }
+
+        return left;
+    }
+
+    // Addition and subtraction
     private AstNode ParseAddSub()
     {
         var left = ParseMulDivMod();
@@ -135,11 +167,11 @@ internal sealed class Parser
 
                     if (Current.Kind != TokenKind.RightParen)
                     {
-                        args.Add(ParseAddSub());
+                        args.Add(ParseTernary());
                         while (Current.Kind == TokenKind.Comma)
                         {
                             Consume(); // consume ','
-                            args.Add(ParseAddSub());
+                            args.Add(ParseTernary());
                         }
                     }
 
@@ -154,7 +186,7 @@ internal sealed class Parser
             case TokenKind.LeftParen:
             {
                 Consume(); // consume '('
-                var node = ParseAddSub();
+                var node = ParseTernary();
                 Expect(TokenKind.RightParen);
                 return node;
             }

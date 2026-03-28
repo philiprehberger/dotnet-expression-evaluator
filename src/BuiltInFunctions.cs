@@ -22,6 +22,15 @@ internal static class BuiltInFunctions
         ["cos"] = args => { RequireArgs("cos", args, 1); return Math.Cos(args[0]); },
         ["tan"] = args => { RequireArgs("tan", args, 1); return Math.Tan(args[0]); },
         ["log"] = args => { RequireArgs("log", args, 1); return Math.Log(args[0]); },
+        ["asin"] = args => { RequireArgs("asin", args, 1); return Math.Asin(args[0]); },
+        ["acos"] = args => { RequireArgs("acos", args, 1); return Math.Acos(args[0]); },
+        ["atan"] = args => { RequireArgs("atan", args, 1); return Math.Atan(args[0]); },
+        ["atan2"] = args => { RequireArgs("atan2", args, 2); return Math.Atan2(args[0], args[1]); },
+        ["exp"] = args => { RequireArgs("exp", args, 1); return Math.Exp(args[0]); },
+        ["log10"] = args => { RequireArgs("log10", args, 1); return Math.Log10(args[0]); },
+        ["pow"] = args => { RequireArgs("pow", args, 2); return Math.Pow(args[0], args[1]); },
+        ["sign"] = args => { RequireArgs("sign", args, 1); return Math.Sign(args[0]); },
+        ["truncate"] = args => { RequireArgs("truncate", args, 1); return Math.Truncate(args[0]); },
     };
 
     /// <summary>
@@ -33,7 +42,7 @@ internal static class BuiltInFunctions
         ["e"] = Math.E,
     };
 
-    private static void RequireArgs(string name, double[] args, int expected)
+    internal static void RequireArgs(string name, double[] args, int expected)
     {
         if (args.Length != expected)
             throw new ArgumentException($"Function '{name}' expects {expected} argument(s) but received {args.Length}.");

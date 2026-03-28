@@ -11,6 +11,12 @@ internal enum TokenKind
     Identifier,
     /// <summary>An operator (+, -, *, /, ^, %).</summary>
     Operator,
+    /// <summary>A comparison operator (&gt;, &lt;, &gt;=, &lt;=, ==, !=).</summary>
+    Comparison,
+    /// <summary>A question mark for ternary conditional.</summary>
+    Question,
+    /// <summary>A colon for ternary conditional.</summary>
+    Colon,
     /// <summary>An opening parenthesis.</summary>
     LeftParen,
     /// <summary>A closing parenthesis.</summary>
@@ -76,9 +82,30 @@ internal sealed class Tokenizer
                 continue;
             }
 
+            // Two-character comparison operators
+            if (ch is '>' or '<' or '=' or '!')
+            {
+                tokens.Add(ReadComparisonOrOperator());
+                continue;
+            }
+
             if (ch is '+' or '-' or '*' or '/' or '^' or '%')
             {
                 tokens.Add(new Token(TokenKind.Operator, ch.ToString()));
+                _pos++;
+                continue;
+            }
+
+            if (ch == '?')
+            {
+                tokens.Add(new Token(TokenKind.Question, "?"));
+                _pos++;
+                continue;
+            }
+
+            if (ch == ':')
+            {
+                tokens.Add(new Token(TokenKind.Colon, ":"));
                 _pos++;
                 continue;
             }
@@ -109,6 +136,45 @@ internal sealed class Tokenizer
 
         tokens.Add(new Token(TokenKind.End, ""));
         return tokens;
+    }
+
+    private Token ReadComparisonOrOperator()
+    {
+        var ch = _input[_pos];
+        var next = _pos + 1 < _input.Length ? _input[_pos + 1] : '\0';
+
+        if (ch == '>' && next == '=')
+        {
+            _pos += 2;
+            return new Token(TokenKind.Comparison, ">=");
+        }
+        if (ch == '<' && next == '=')
+        {
+            _pos += 2;
+            return new Token(TokenKind.Comparison, "<=");
+        }
+        if (ch == '=' && next == '=')
+        {
+            _pos += 2;
+            return new Token(TokenKind.Comparison, "==");
+        }
+        if (ch == '!' && next == '=')
+        {
+            _pos += 2;
+            return new Token(TokenKind.Comparison, "!=");
+        }
+        if (ch == '>')
+        {
+            _pos++;
+            return new Token(TokenKind.Comparison, ">");
+        }
+        if (ch == '<')
+        {
+            _pos++;
+            return new Token(TokenKind.Comparison, "<");
+        }
+
+        throw new FormatException($"Unexpected character '{ch}' at position {_pos}.");
     }
 
     private Token ReadNumber()
