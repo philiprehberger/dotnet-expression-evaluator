@@ -2,12 +2,7 @@
 
 [![CI](https://github.com/philiprehberger/dotnet-expression-evaluator/actions/workflows/ci.yml/badge.svg)](https://github.com/philiprehberger/dotnet-expression-evaluator/actions/workflows/ci.yml)
 [![NuGet](https://img.shields.io/nuget/v/Philiprehberger.ExpressionEvaluator.svg)](https://www.nuget.org/packages/Philiprehberger.ExpressionEvaluator)
-[![GitHub release](https://img.shields.io/github/v/release/philiprehberger/dotnet-expression-evaluator)](https://github.com/philiprehberger/dotnet-expression-evaluator/releases)
 [![Last updated](https://img.shields.io/github/last-commit/philiprehberger/dotnet-expression-evaluator)](https://github.com/philiprehberger/dotnet-expression-evaluator/commits/main)
-[![License](https://img.shields.io/github/license/philiprehberger/dotnet-expression-evaluator)](LICENSE)
-[![Bug Reports](https://img.shields.io/github/issues/philiprehberger/dotnet-expression-evaluator/bug)](https://github.com/philiprehberger/dotnet-expression-evaluator/issues?q=is%3Aissue+is%3Aopen+label%3Abug)
-[![Feature Requests](https://img.shields.io/github/issues/philiprehberger/dotnet-expression-evaluator/enhancement)](https://github.com/philiprehberger/dotnet-expression-evaluator/issues?q=is%3Aissue+is%3Aopen+label%3Aenhancement)
-[![Sponsor](https://img.shields.io/badge/sponsor-GitHub%20Sponsors-ec6cb9)](https://github.com/sponsors/philiprehberger)
 
 Safe mathematical expression parser and evaluator with variables, custom functions, and operator precedence.
 
@@ -187,10 +182,21 @@ dotnet build src/Philiprehberger.ExpressionEvaluator.csproj --configuration Rele
 
 ## Support
 
-If you find this package useful, consider giving it a star on GitHub — it helps motivate continued maintenance and development.
+If you find this project useful:
 
-[![LinkedIn](https://img.shields.io/badge/Philip%20Rehberger-LinkedIn-0A66C2?logo=linkedin)](https://www.linkedin.com/in/philiprehberger)
-[![More packages](https://img.shields.io/badge/more-open%20source%20packages-blue)](https://philiprehberger.com/open-source-packages)
+⭐ [Star the repo](https://github.com/philiprehberger/dotnet-expression-evaluator)
+
+🐛 [Report issues](https://github.com/philiprehberger/dotnet-expression-evaluator/issues?q=is%3Aissue+is%3Aopen+label%3Abug)
+
+💡 [Suggest features](https://github.com/philiprehberger/dotnet-expression-evaluator/issues?q=is%3Aissue+is%3Aopen+label%3Aenhancement)
+
+❤️ [Sponsor development](https://github.com/sponsors/philiprehberger)
+
+🌐 [All Open Source Projects](https://philiprehberger.com/open-source-packages)
+
+💻 [GitHub Profile](https://github.com/philiprehberger)
+
+🔗 [LinkedIn Profile](https://www.linkedin.com/in/philiprehberger)
 
 ## License
 
