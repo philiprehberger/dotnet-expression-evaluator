@@ -7,12 +7,20 @@ internal enum TokenKind
 {
     /// <summary>A numeric literal.</summary>
     Number,
+    /// <summary>A string literal (single-quoted).</summary>
+    String,
     /// <summary>An identifier (variable or function name).</summary>
     Identifier,
     /// <summary>An operator (+, -, *, /, ^, %).</summary>
     Operator,
     /// <summary>A comparison operator (&gt;, &lt;, &gt;=, &lt;=, ==, !=).</summary>
     Comparison,
+    /// <summary>A logical AND operator (&amp;&amp;).</summary>
+    LogicalAnd,
+    /// <summary>A logical OR operator (||).</summary>
+    LogicalOr,
+    /// <summary>A logical NOT operator (!).</summary>
+    LogicalNot,
     /// <summary>A question mark for ternary conditional.</summary>
     Question,
     /// <summary>A colon for ternary conditional.</summary>
@@ -76,16 +84,62 @@ internal sealed class Tokenizer
                 continue;
             }
 
+            if (ch == '\'')
+            {
+                tokens.Add(ReadString());
+                continue;
+            }
+
             if (char.IsLetter(ch) || ch == '_')
             {
                 tokens.Add(ReadIdentifier());
                 continue;
             }
 
-            // Two-character comparison operators
-            if (ch is '>' or '<' or '=' or '!')
+            // Logical operators
+            if (ch == '&')
+            {
+                if (_pos + 1 < _input.Length && _input[_pos + 1] == '&')
+                {
+                    tokens.Add(new Token(TokenKind.LogicalAnd, "&&"));
+                    _pos += 2;
+                    continue;
+                }
+
+                throw new FormatException($"Unexpected character '&' at position {_pos}. Did you mean '&&'?");
+            }
+
+            if (ch == '|')
+            {
+                if (_pos + 1 < _input.Length && _input[_pos + 1] == '|')
+                {
+                    tokens.Add(new Token(TokenKind.LogicalOr, "||"));
+                    _pos += 2;
+                    continue;
+                }
+
+                throw new FormatException($"Unexpected character '|' at position {_pos}. Did you mean '||'?");
+            }
+
+            // Two-character comparison operators (must check before '!' as standalone)
+            if (ch is '>' or '<' or '=')
             {
                 tokens.Add(ReadComparisonOrOperator());
+                continue;
+            }
+
+            if (ch == '!')
+            {
+                var next = _pos + 1 < _input.Length ? _input[_pos + 1] : '\0';
+                if (next == '=')
+                {
+                    _pos += 2;
+                    tokens.Add(new Token(TokenKind.Comparison, "!="));
+                    continue;
+                }
+
+                tokens.Add(new Token(TokenKind.LogicalNot, "!"));
+                _pos++;
                 continue;
             }
 
@@ -158,11 +212,6 @@ internal sealed class Tokenizer
             _pos += 2;
             return new Token(TokenKind.Comparison, "==");
         }
-        if (ch == '!' && next == '=')
-        {
-            _pos += 2;
-            return new Token(TokenKind.Comparison, "!=");
-        }
         if (ch == '>')
         {
             _pos++;
@@ -195,6 +244,24 @@ internal sealed class Tokenizer
         }
 
         return new Token(TokenKind.Number, _input[start.._pos]);
+    }
+
+    private Token ReadString()
+    {
+        _pos++; // skip opening quote
+        var start = _pos;
+
+        while (_pos < _input.Length && _input[_pos] != '\'')
+        {
+            _pos++;
+        }
+
+        if (_pos >= _input.Length)
+            throw new FormatException("Unterminated string literal.");
+
+        var value = _input[start.._pos];
+        _pos++; // skip closing quote
+        return new Token(TokenKind.String, value);
     }
 
     private Token ReadIdentifier()

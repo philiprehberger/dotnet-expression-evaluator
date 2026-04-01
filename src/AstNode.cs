@@ -12,6 +12,12 @@ internal abstract record AstNode;
 internal sealed record NumberNode(double Value) : AstNode;
 
 /// <summary>
+/// A string literal value (delimited by single quotes).
+/// </summary>
+/// <param name="Value">The string value.</param>
+internal sealed record StringNode(string Value) : AstNode;
+
+/// <summary>
 /// A variable reference resolved at evaluation time.
 /// </summary>
 /// <param name="Name">The variable name.</param>
@@ -32,6 +38,26 @@ internal sealed record BinaryNode(char Operator, AstNode Left, AstNode Right) : 
 /// <param name="Left">The left operand.</param>
 /// <param name="Right">The right operand.</param>
 internal sealed record ComparisonNode(string Operator, AstNode Left, AstNode Right) : AstNode;
+
+/// <summary>
+/// A logical AND operation (short-circuit). Returns 1.0 if both operands are non-zero, 0.0 otherwise.
+/// </summary>
+/// <param name="Left">The left operand.</param>
+/// <param name="Right">The right operand.</param>
+internal sealed record LogicalAndNode(AstNode Left, AstNode Right) : AstNode;
+
+/// <summary>
+/// A logical OR operation (short-circuit). Returns 1.0 if either operand is non-zero, 0.0 otherwise.
+/// </summary>
+/// <param name="Left">The left operand.</param>
+/// <param name="Right">The right operand.</param>
+internal sealed record LogicalOrNode(AstNode Left, AstNode Right) : AstNode;
+
+/// <summary>
+/// A logical NOT operation. Returns 1.0 if the operand is zero, 0.0 otherwise.
+/// </summary>
+/// <param name="Operand">The operand.</param>
+internal sealed record LogicalNotNode(AstNode Operand) : AstNode;
 
 /// <summary>
 /// A conditional (ternary) expression: condition ? trueExpr : falseExpr.

@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.0 (2026-03-31)
+
+- Add logical operators `&&`, `||`, `!` with short-circuit evaluation and proper precedence
+- Add string literal support using single quotes (e.g. `'hello'`)
+- Add built-in string functions: `len(s)`, `upper(s)`, `lower(s)`, `trim(s)`, `concat(a,b)`, `contains(s,sub)`
+- Add statistical functions: `mean(...)`, `median(...)`, `stdev(...)`, `variance(...)` with variable-length arguments
+
 ## 0.2.1 (2026-03-31)
 
 - Standardize README to 3-badge format with emoji Support section

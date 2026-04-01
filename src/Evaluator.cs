@@ -65,7 +65,7 @@ public sealed class Evaluator
     public double Evaluate(string expression, IDictionary<string, double>? variables = null)
     {
         var ast = ParseExpression(expression);
-        return EvaluateNode(ast, variables ?? new Dictionary<string, double>());
+        return EvaluateNode(ast, variables ?? new Dictionary<string, double>()).AsNumber();
     }
 
     /// <summary>
@@ -77,7 +77,7 @@ public sealed class Evaluator
     public Func<IDictionary<string, double>, double> Compile(string expression)
     {
         var ast = ParseExpression(expression);
-        return variables => EvaluateNode(ast, variables);
+        return variables => EvaluateNode(ast, variables).AsNumber();
     }
 
     /// <summary>
@@ -92,7 +92,7 @@ public sealed class Evaluator
     public static double Eval(string expression, IDictionary<string, double>? variables = null)
     {
         var ast = ParseExpression(expression);
-        return EvaluateNodeStatic(ast, variables ?? new Dictionary<string, double>());
+        return EvaluateNodeStatic(ast, variables ?? new Dictionary<string, double>()).AsNumber();
     }
 
     /// <summary>
@@ -104,7 +104,7 @@ public sealed class Evaluator
     public static Func<IDictionary<string, double>, double> CompileStatic(string expression)
     {
         var ast = ParseExpression(expression);
-        return variables => EvaluateNodeStatic(ast, variables);
+        return variables => EvaluateNodeStatic(ast, variables).AsNumber();
     }
 
     private static AstNode ParseExpression(string expression)
@@ -118,17 +118,19 @@ public sealed class Evaluator
         return parser.Parse();
     }
 
-    private double EvaluateNode(AstNode node, IDictionary<string, double> variables)
+    private EvalValue EvaluateNode(AstNode node, IDictionary<string, double> variables)
     {
         return node switch
         {
-            NumberNode n => n.Value,
+            NumberNode n => new EvalValue(n.Value),
 
-            VariableNode v => ResolveVariable(v.Name, variables),
+            StringNode s => new EvalValue(s.Value),
+
+            VariableNode v => new EvalValue(ResolveVariable(v.Name, variables)),
 
             UnaryNode u => u.Operator switch
             {
-                '-' => -EvaluateNode(u.Operand, variables),
+                '-' => new EvalValue(-EvaluateNode(u.Operand, variables).AsNumber()),
                 _ => throw new FormatException($"Unknown unary operator '{u.Operator}'.")
             },
 
@@ -136,7 +138,15 @@ public sealed class Evaluator
 
             ComparisonNode c => EvaluateComparison(c, variables),
 
-            ConditionalNode t => EvaluateNode(t.Condition, variables) != 0.0
+            LogicalAndNode a => EvaluateLogicalAnd(a, variables),
+
+            LogicalOrNode o => EvaluateLogicalOr(o, variables),
+
+            LogicalNotNode n => EvaluateNode(n.Operand, variables).AsNumber() == 0.0
+                ? new EvalValue(1.0)
+                : new EvalValue(0.0),
+
+            ConditionalNode t => EvaluateNode(t.Condition, variables).AsNumber() != 0.0
                 ? EvaluateNode(t.TrueExpr, variables)
                 : EvaluateNode(t.FalseExpr, variables),
 
@@ -146,17 +156,19 @@ public sealed class Evaluator
         };
     }
 
-    private static double EvaluateNodeStatic(AstNode node, IDictionary<string, double> variables)
+    private static EvalValue EvaluateNodeStatic(AstNode node, IDictionary<string, double> variables)
     {
         return node switch
         {
-            NumberNode n => n.Value,
+            NumberNode n => new EvalValue(n.Value),
 
-            VariableNode v => ResolveVariable(v.Name, variables),
+            StringNode s => new EvalValue(s.Value),
+
+            VariableNode v => new EvalValue(ResolveVariable(v.Name, variables)),
 
             UnaryNode u => u.Operator switch
             {
-                '-' => -EvaluateNodeStatic(u.Operand, variables),
+                '-' => new EvalValue(-EvaluateNodeStatic(u.Operand, variables).AsNumber()),
                 _ => throw new FormatException($"Unknown unary operator '{u.Operator}'.")
             },
 
@@ -164,7 +176,15 @@ public sealed class Evaluator
 
             ComparisonNode c => EvaluateComparisonStatic(c, variables),
 
-            ConditionalNode t => EvaluateNodeStatic(t.Condition, variables) != 0.0
+            LogicalAndNode a => EvaluateLogicalAndStatic(a, variables),
+
+            LogicalOrNode o => EvaluateLogicalOrStatic(o, variables),
+
+            LogicalNotNode n => EvaluateNodeStatic(n.Operand, variables).AsNumber() == 0.0
+                ? new EvalValue(1.0)
+                : new EvalValue(0.0),
+
+            ConditionalNode t => EvaluateNodeStatic(t.Condition, variables).AsNumber() != 0.0
                 ? EvaluateNodeStatic(t.TrueExpr, variables)
                 : EvaluateNodeStatic(t.FalseExpr, variables),
 
@@ -185,18 +205,18 @@ public sealed class Evaluator
         throw new KeyNotFoundException($"Variable '{name}' is not defined.");
     }
 
-    private double EvaluateBinary(BinaryNode node, IDictionary<string, double> variables)
+    private EvalValue EvaluateBinary(BinaryNode node, IDictionary<string, double> variables)
     {
-        var left = EvaluateNode(node.Left, variables);
-        var right = EvaluateNode(node.Right, variables);
-        return ApplyBinaryOperator(node.Operator, left, right);
+        var left = EvaluateNode(node.Left, variables).AsNumber();
+        var right = EvaluateNode(node.Right, variables).AsNumber();
+        return new EvalValue(ApplyBinaryOperator(node.Operator, left, right));
     }
 
-    private static double EvaluateBinaryStatic(BinaryNode node, IDictionary<string, double> variables)
+    private static EvalValue EvaluateBinaryStatic(BinaryNode node, IDictionary<string, double> variables)
     {
-        var left = EvaluateNodeStatic(node.Left, variables);
-        var right = EvaluateNodeStatic(node.Right, variables);
-        return ApplyBinaryOperator(node.Operator, left, right);
+        var left = EvaluateNodeStatic(node.Left, variables).AsNumber();
+        var right = EvaluateNodeStatic(node.Right, variables).AsNumber();
+        return new EvalValue(ApplyBinaryOperator(node.Operator, left, right));
     }
 
     private static double ApplyBinaryOperator(char op, double left, double right)
@@ -217,18 +237,18 @@ public sealed class Evaluator
         };
     }
 
-    private double EvaluateComparison(ComparisonNode node, IDictionary<string, double> variables)
+    private EvalValue EvaluateComparison(ComparisonNode node, IDictionary<string, double> variables)
     {
-        var left = EvaluateNode(node.Left, variables);
-        var right = EvaluateNode(node.Right, variables);
-        return ApplyComparison(node.Operator, left, right);
+        var left = EvaluateNode(node.Left, variables).AsNumber();
+        var right = EvaluateNode(node.Right, variables).AsNumber();
+        return new EvalValue(ApplyComparison(node.Operator, left, right));
     }
 
-    private static double EvaluateComparisonStatic(ComparisonNode node, IDictionary<string, double> variables)
+    private static EvalValue EvaluateComparisonStatic(ComparisonNode node, IDictionary<string, double> variables)
     {
-        var left = EvaluateNodeStatic(node.Left, variables);
-        var right = EvaluateNodeStatic(node.Right, variables);
-        return ApplyComparison(node.Operator, left, right);
+        var left = EvaluateNodeStatic(node.Left, variables).AsNumber();
+        var right = EvaluateNodeStatic(node.Right, variables).AsNumber();
+        return new EvalValue(ApplyComparison(node.Operator, left, right));
     }
 
     private static double ApplyComparison(string op, double left, double right)
@@ -247,30 +267,84 @@ public sealed class Evaluator
         return result ? 1.0 : 0.0;
     }
 
-    private double EvaluateFunction(FunctionCallNode node, IDictionary<string, double> variables)
+    private EvalValue EvaluateLogicalAnd(LogicalAndNode node, IDictionary<string, double> variables)
     {
+        var left = EvaluateNode(node.Left, variables).AsNumber();
+        if (left == 0.0)
+            return new EvalValue(0.0);
+        var right = EvaluateNode(node.Right, variables).AsNumber();
+        return new EvalValue(right != 0.0 ? 1.0 : 0.0);
+    }
+
+    private static EvalValue EvaluateLogicalAndStatic(LogicalAndNode node, IDictionary<string, double> variables)
+    {
+        var left = EvaluateNodeStatic(node.Left, variables).AsNumber();
+        if (left == 0.0)
+            return new EvalValue(0.0);
+        var right = EvaluateNodeStatic(node.Right, variables).AsNumber();
+        return new EvalValue(right != 0.0 ? 1.0 : 0.0);
+    }
+
+    private EvalValue EvaluateLogicalOr(LogicalOrNode node, IDictionary<string, double> variables)
+    {
+        var left = EvaluateNode(node.Left, variables).AsNumber();
+        if (left != 0.0)
+            return new EvalValue(1.0);
+        var right = EvaluateNode(node.Right, variables).AsNumber();
+        return new EvalValue(right != 0.0 ? 1.0 : 0.0);
+    }
+
+    private static EvalValue EvaluateLogicalOrStatic(LogicalOrNode node, IDictionary<string, double> variables)
+    {
+        var left = EvaluateNodeStatic(node.Left, variables).AsNumber();
+        if (left != 0.0)
+            return new EvalValue(1.0);
+        var right = EvaluateNodeStatic(node.Right, variables).AsNumber();
+        return new EvalValue(right != 0.0 ? 1.0 : 0.0);
+    }
+
+    private EvalValue EvaluateFunction(FunctionCallNode node, IDictionary<string, double> variables)
+    {
+        // Check string functions first (they handle EvalValue arguments)
+        if (BuiltInFunctions.StringFunctions.TryGetValue(node.FunctionName, out var stringFunc))
+        {
+            var evalArgs = node.Arguments
+                .Select(arg => EvaluateNode(arg, variables))
+                .ToArray();
+            return stringFunc(evalArgs);
+        }
+
         var args = node.Arguments
-            .Select(arg => EvaluateNode(arg, variables))
+            .Select(arg => EvaluateNode(arg, variables).AsNumber())
             .ToArray();
 
         if (_customFunctions.TryGetValue(node.FunctionName, out var customFunc))
-            return customFunc(args);
+            return new EvalValue(customFunc(args));
 
         if (BuiltInFunctions.Functions.TryGetValue(node.FunctionName, out var builtInFunc))
-            return builtInFunc(args);
+            return new EvalValue(builtInFunc(args));
 
         throw new ArgumentException($"Unknown function '{node.FunctionName}'.");
     }
 
-    private static double EvaluateFunctionStatic(FunctionCallNode node, IDictionary<string, double> variables)
+    private static EvalValue EvaluateFunctionStatic(FunctionCallNode node, IDictionary<string, double> variables)
     {
+        // Check string functions first (they handle EvalValue arguments)
+        if (BuiltInFunctions.StringFunctions.TryGetValue(node.FunctionName, out var stringFunc))
+        {
+            var evalArgs = node.Arguments
+                .Select(arg => EvaluateNodeStatic(arg, variables))
+                .ToArray();
+            return stringFunc(evalArgs);
+        }
+
         if (!BuiltInFunctions.Functions.TryGetValue(node.FunctionName, out var func))
             throw new ArgumentException($"Unknown function '{node.FunctionName}'.");
 
         var args = node.Arguments
-            .Select(arg => EvaluateNodeStatic(arg, variables))
+            .Select(arg => EvaluateNodeStatic(arg, variables).AsNumber())
             .ToArray();
 
-        return func(args);
+        return new EvalValue(func(args));
     }
 }

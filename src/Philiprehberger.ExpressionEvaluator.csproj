@@ -8,12 +8,12 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageId>Philiprehberger.ExpressionEvaluator</PackageId>
-    <Version>0.2.1</Version>
+    <Version>0.3.0</Version>
     <Authors>Philip Rehberger</Authors>
-    <Description>Safe mathematical expression parser and evaluator with variables, custom functions, and operator precedence.</Description>
+    <Description>Safe mathematical expression parser and evaluator with variables, custom functions, logical operators, string functions, statistical functions, and operator precedence.</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <PackageTags>expression;evaluator;math;parser;formula</PackageTags>
+    <PackageTags>expression;evaluator;math;parser;formula;string;statistics;logical</PackageTags>
     <RepositoryUrl>https://github.com/philiprehberger/dotnet-expression-evaluator</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
   </PropertyGroup>
