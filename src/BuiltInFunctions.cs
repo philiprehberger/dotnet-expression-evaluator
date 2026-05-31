@@ -73,6 +73,40 @@ internal static class BuiltInFunctions
             RequireEvalArgs("contains", args, 2);
             return args[0].AsString().Contains(args[1].AsString(), StringComparison.Ordinal) ? 1.0 : 0.0;
         },
+        ["replace"] = args =>
+        {
+            RequireEvalArgs("replace", args, 3);
+            return args[0].AsString().Replace(args[1].AsString(), args[2].AsString(), StringComparison.Ordinal);
+        },
+        ["substring"] = args =>
+        {
+            RequireEvalArgs("substring", args, 3);
+            var source = args[0].AsString();
+            var start = (int)args[1].AsNumber();
+            var length = (int)args[2].AsNumber();
+
+            if (start < 0) start = 0;
+            if (start > source.Length) start = source.Length;
+            if (length < 0) length = 0;
+            if (start + length > source.Length) length = source.Length - start;
+
+            return source.Substring(start, length);
+        },
+        ["indexof"] = args =>
+        {
+            RequireEvalArgs("indexof", args, 2);
+            return (double)args[0].AsString().IndexOf(args[1].AsString(), StringComparison.Ordinal);
+        },
+        ["startswith"] = args =>
+        {
+            RequireEvalArgs("startswith", args, 2);
+            return args[0].AsString().StartsWith(args[1].AsString(), StringComparison.Ordinal) ? 1.0 : 0.0;
+        },
+        ["endswith"] = args =>
+        {
+            RequireEvalArgs("endswith", args, 2);
+            return args[0].AsString().EndsWith(args[1].AsString(), StringComparison.Ordinal) ? 1.0 : 0.0;
+        },
     };
 
     /// <summary>

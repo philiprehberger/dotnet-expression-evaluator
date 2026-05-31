@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.0 (2026-05-30)
+
+- Add built-in string functions: `replace(s, old, new)`, `substring(s, start, length)`, `indexof(s, sub)`, `startswith(s, sub)`, `endswith(s, sub)`
+- Document statistical and string functions in README API reference
+- Add card image to README
+
 ## 0.3.0 (2026-03-31)
 
 - Add logical operators `&&`, `||`, `!` with short-circuit evaluation and proper precedence

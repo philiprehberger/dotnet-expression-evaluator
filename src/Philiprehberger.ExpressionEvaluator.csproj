@@ -8,7 +8,7 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageId>Philiprehberger.ExpressionEvaluator</PackageId>
-    <Version>0.3.0</Version>
+    <Version>0.4.0</Version>
     <Authors>Philip Rehberger</Authors>
     <Description>Safe mathematical expression parser and evaluator with variables, custom functions, logical operators, string functions, statistical functions, and operator precedence.</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>

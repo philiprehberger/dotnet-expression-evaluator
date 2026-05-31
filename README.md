@@ -4,6 +4,8 @@
 [![NuGet](https://img.shields.io/nuget/v/Philiprehberger.ExpressionEvaluator.svg)](https://www.nuget.org/packages/Philiprehberger.ExpressionEvaluator)
 [![Last updated](https://img.shields.io/github/last-commit/philiprehberger/dotnet-expression-evaluator)](https://github.com/philiprehberger/dotnet-expression-evaluator/commits/main)
 
+![Philiprehberger.ExpressionEvaluator](https://raw.githubusercontent.com/philiprehberger/dotnet-expression-evaluator/main/package-card.webp)
+
 Safe mathematical expression parser and evaluator with variables, custom functions, and operator precedence.
 
 ## Installation
@@ -101,6 +103,20 @@ Evaluator.Eval("pow(2, 10)");         // 1024
 Evaluator.Eval("log10(100)");         // 2
 ```
 
+### String Manipulation
+
+```csharp
+using Philiprehberger.ExpressionEvaluator;
+
+Evaluator.Eval("len('hello')");                       // 5
+Evaluator.Eval("upper('hello')");                     // "HELLO"
+Evaluator.Eval("replace('foo bar', 'bar', 'baz')");   // "foo baz"
+Evaluator.Eval("substring('hello world', 6, 5)");     // "world"
+Evaluator.Eval("indexof('hello world', 'world')");    // 6
+Evaluator.Eval("startswith('hello', 'he')");          // 1
+Evaluator.Eval("endswith('hello', 'lo')");            // 1
+```
+
 ### Compiled Expressions
 
 ```csharp
@@ -173,6 +189,31 @@ double r2 = formula(new Dictionary<string, double> { ["x"] = 5 });  // 36
 | `truncate(x)` | Truncate toward zero |
 | `pi` | Constant 3.14159... |
 | `e` | Constant 2.71828... |
+
+### Built-in String Functions
+
+| Function | Description |
+|----------|-------------|
+| `len(s)` | Returns the length of the string |
+| `upper(s)` | Uppercase conversion |
+| `lower(s)` | Lowercase conversion |
+| `trim(s)` | Strips leading/trailing whitespace |
+| `concat(a, b)` | Concatenates two strings |
+| `contains(s, sub)` | Returns 1.0 if `s` contains `sub`, else 0.0 |
+| `replace(s, old, new)` | Replaces all occurrences of `old` with `new` |
+| `substring(s, start, length)` | Bounds-safe substring extraction |
+| `indexof(s, sub)` | Returns the first index of `sub` in `s`, or -1 |
+| `startswith(s, sub)` | Returns 1.0 if `s` starts with `sub`, else 0.0 |
+| `endswith(s, sub)` | Returns 1.0 if `s` ends with `sub`, else 0.0 |
+
+### Built-in Statistical Functions
+
+| Function | Description |
+|----------|-------------|
+| `mean(...)` | Arithmetic mean of arguments |
+| `median(...)` | Median value |
+| `stdev(...)` | Population standard deviation |
+| `variance(...)` | Population variance |
 
 ## Development
 
